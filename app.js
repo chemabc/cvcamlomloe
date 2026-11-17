@@ -434,11 +434,13 @@
     }
   }
 
-  // Oculta en los dos árboles lo que no es de la etapa y el curso elegidos en los menús
+  // Oculta en los dos árboles lo que no es de la etapa, el curso y la asignatura elegidos en los menús
   function aplicarFiltroArbol() {
     const etapa = fEtapa.value;
     const curso = +fCurso.value;
-    const nivelVisible = (n) => (!etapa || n.materia.etapa === etapa) && (!curso || nivelEnCurso(n, etapa, curso));
+    const materia = fMateria.value;
+    const nivelVisible = (n) => (!etapa || n.materia.etapa === etapa) && (!curso || nivelEnCurso(n, etapa, curso))
+      && (materia === '' || String(n.materia.indice) === materia);
     document.querySelectorAll('.arbol details.etapa').forEach((d) => {
       d.hidden = !!etapa && d.dataset.etapa !== etapa;
       if (etapa && !d.hidden) d.open = true;
@@ -454,6 +456,14 @@
       d.hidden = !!curso && +d.dataset.curso !== curso;
       if (curso && !d.hidden) d.open = true;
     });
+    // En el árbol por curso, con una asignatura elegida solo quedan sus niveles
+    arbolCursos.querySelectorAll('a[data-nivel]').forEach((a) => { a.hidden = !nivelVisible(NIVELES.get(a.dataset.nivel)); });
+    if (materia !== '') {
+      arbolCursos.querySelectorAll('details[data-curso]').forEach((d) => {
+        if (!d.hidden) d.hidden = !d.querySelector('a[data-nivel]:not([hidden])');
+        if (!d.hidden) d.open = true;
+      });
+    }
     document.getElementById('f-quitar').hidden = !etapa;
   }
 
@@ -488,6 +498,7 @@
   const campo = document.getElementById('q');
   const fEtapa = document.getElementById('f-etapa');
   const fCurso = document.getElementById('f-curso');
+  const fMateria = document.getElementById('f-materia');
   const casillas = { comp: document.getElementById('t-comp'), crit: document.getElementById('t-crit'), cont: document.getElementById('t-cont') };
 
   // Rellena el desplegable de etapas
@@ -503,12 +514,33 @@
     fCurso.disabled = !etapa;
   }
 
-  // Indica si una entrada pasa los filtros de etapa, curso y tipo
+  // Rellena el desplegable de asignaturas según la etapa y el curso (conserva la elegida si sigue valiendo)
+  function rellenarMaterias() {
+    const etapa = fEtapa.value;
+    const curso = +fCurso.value;
+    const anterior = fMateria.value;
+    const materias = DATOS.materias.filter((m) => m.etapa === etapa && m.niveles.length
+      && (!curso || m.niveles.some((n) => nivelEnCurso(n, etapa, curso))));
+    fMateria.replaceChildren(h('option', { value: '' }, 'Todas'), ...materias.map((m) => h('option', { value: String(m.indice) }, m.nombre)));
+    fMateria.value = materias.some((m) => String(m.indice) === anterior) ? anterior : '';
+    fMateria.disabled = !etapa;
+  }
+
+  // Nivel único que dejan los menús (etapa + asignatura y, si hace falta, curso); si no, null
+  function nivelFiltrado() {
+    if (!fEtapa.value || fMateria.value === '') return null;
+    const m = DATOS.materias[+fMateria.value];
+    const niveles = m ? m.niveles.filter((n) => !+fCurso.value || nivelEnCurso(n, fEtapa.value, +fCurso.value)) : [];
+    return niveles.length === 1 ? niveles[0] : null;
+  }
+
+  // Indica si una entrada pasa los filtros de etapa, curso, asignatura y tipo
   function pasaFiltros(e) {
     const tipo = e.tipo === 'bloque' ? 'cont' : e.tipo;
     if (!casillas[tipo].checked) return false;
     const etapa = fEtapa.value;
     if (etapa && e.nivel.materia.etapa !== etapa) return false;
+    if (fMateria.value !== '' && String(e.nivel.materia.indice) !== fMateria.value) return false;
     const curso = +fCurso.value;
     if (etapa && curso) {
       // Las competencias comunes valen si la materia tiene algún nivel de ese curso
@@ -539,17 +571,19 @@
       h('ul', null,
         h('li', null, 'Pulsa ', h('kbd', null, '/'), ' para ir al buscador y ', h('kbd', null, 'Esc'), ' para borrarlo.'),
         h('li', null, 'Varias palabras buscan elementos que contengan todas: «fracciones problemas».'),
-        h('li', null, 'Los menús Etapa y Curso filtran el índice y la búsqueda; sin búsqueda, muestran las asignaturas de esa etapa o curso.'),
+        h('li', null, 'Los menús Etapa, Curso y Asignatura filtran el índice y la búsqueda; sin búsqueda, muestran lo elegido (con etapa, curso y asignatura, su currículo directamente).'),
         h('li', null, 'Dentro de un curso, las pestañas Competencias, Criterios y Contenidos llevan a cada sección.'),
         h('li', null, 'Marca las casillas ☑ de lo que quieras (también de cursos distintos o de los resultados de búsqueda) y pulsa «Copiar selección» abajo.'),
         h('li', null, 'Cada criterio tiene «Copiar criterio completo» (la competencia con todos sus criterios: 1, 1.1, 1.2…). Un contenido se copia con sus subapartados.'),
         h('li', null, 'La dirección de la página cambia al navegar: puedes guardarla en favoritos o compartirla.'))));
   }
 
-  // Asignaturas de la etapa (y curso) elegidos en los menús
+  // Asignaturas de la etapa (y curso, y asignatura) elegidos en los menús
   function pintarListado(etapa, curso) {
     const e = ETAPAS[etapa];
-    const niveles = [...NIVELES.values()].filter((n) => n.materia.etapa === etapa && (!curso || nivelEnCurso(n, etapa, curso)));
+    const materia = fMateria.value;
+    const niveles = [...NIVELES.values()].filter((n) => n.materia.etapa === etapa && (!curso || nivelEnCurso(n, etapa, curso))
+      && (materia === '' || String(n.materia.indice) === materia));
     const contenido = [
       h('div', { class: 'migas' }, e.nombre),
       h('h2', { class: 'titulo-nivel' }, curso ? nombreCurso(etapa, curso) : e.nombre),
@@ -563,7 +597,7 @@
           h('span', null, n.etiqueta)))));
     } else {
       // Una etapa: cada asignatura con sus cursos
-      const materias = DATOS.materias.filter((m) => m.etapa === etapa && m.niveles.length);
+      const materias = DATOS.materias.filter((m) => m.etapa === etapa && m.niveles.length && (materia === '' || String(m.indice) === materia));
       contenido.push(h('p', { class: 'resumen' }, `${materias.length} asignaturas o ámbitos. Elige un curso en el menú «Curso» o pulsa uno de los de abajo.`),
         h('div', { class: 'tarjetas' }, materias.map((m) => h('div', { class: 'tarjeta' },
           h('strong', null, m.nombre),
@@ -830,10 +864,13 @@
   function alCambiarFiltro() {
     aplicarFiltroArbol();
     const q = campo.value;
-    irA(q.trim().length >= 2 ? { q } : {}, false);
+    if (q.trim().length >= 2) { irA({ q }, false); return; }
+    const unico = nivelFiltrado();
+    irA(unico ? { n: unico.id } : {}, false);
   }
-  fEtapa.addEventListener('change', () => { rellenarCursos(); alCambiarFiltro(); });
-  fCurso.addEventListener('change', alCambiarFiltro);
+  fEtapa.addEventListener('change', () => { rellenarCursos(); rellenarMaterias(); alCambiarFiltro(); });
+  fCurso.addEventListener('change', () => { rellenarMaterias(); alCambiarFiltro(); });
+  fMateria.addEventListener('change', alCambiarFiltro);
   // Las casillas de tipo solo afectan a la búsqueda
   Object.values(casillas).forEach((c) => c.addEventListener('change', () => {
     const q = campo.value;
@@ -843,6 +880,7 @@
   document.getElementById('f-quitar').addEventListener('click', () => {
     fEtapa.value = '';
     rellenarCursos();
+    rellenarMaterias();
     alCambiarFiltro();
   });
 
@@ -886,6 +924,7 @@
   construirArbolCursos();
   // Menús coherentes aunque el navegador recuerde valores de otra visita
   rellenarCursos();
+  rellenarMaterias();
   aplicarFiltroArbol();
   elegirArbol(leerPreferencia('arbol', 'materias'));
   pintar();
