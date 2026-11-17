@@ -1,0 +1,68 @@
+<!doctype html>
+<!-- Explorador estático del currículo de la Comunidad de Madrid (Primaria, ESO y Bachillerato).
+     Funciona con doble clic (sin servidor) y como web estática (GitHub Pages, Quarto…). -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Currículo · Comunidad de Madrid</title>
+  <meta name="description" content="Explorador del currículo de Primaria, ESO y Bachillerato de la Comunidad de Madrid: competencias específicas, criterios de evaluación y contenidos.">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <!-- Cabecera: botón del índice (móvil), título y buscador -->
+  <header class="cabecera">
+    <button id="btn-indice" class="boton-indice" type="button" aria-label="Mostrar u ocultar el índice">☰</button>
+    <h1><a href="#">Currículo <span class="sub">Comunidad de Madrid</span></a></h1>
+    <div class="buscador">
+      <input id="q" type="search" placeholder="Buscar en competencias, criterios y contenidos…" autocomplete="off" spellcheck="false" aria-label="Buscar">
+      <kbd class="atajo" title="Pulsa / para buscar">/</kbd>
+    </div>
+  </header>
+
+  <!-- Filtros de la búsqueda -->
+  <div class="filtros" id="filtros">
+    <label>Etapa
+      <select id="f-etapa"><option value="">Todas</option></select>
+    </label>
+    <label>Curso
+      <select id="f-curso" disabled><option value="">Todos</option></select>
+    </label>
+    <span class="tipos">
+      <label><input type="checkbox" id="t-comp" checked> Competencias</label>
+      <label><input type="checkbox" id="t-crit" checked> Criterios</label>
+      <label><input type="checkbox" id="t-cont" checked> Contenidos</label>
+    </span>
+  </div>
+
+  <div class="cuerpo">
+    <!-- Índice lateral con los dos árboles -->
+    <aside id="indice" class="indice">
+      <div class="pestanas" role="tablist">
+        <button type="button" role="tab" data-arbol="materias" class="activa">Por asignatura</button>
+        <button type="button" role="tab" data-arbol="cursos">Por curso</button>
+      </div>
+      <nav id="arbol-materias" class="arbol" aria-label="Índice por asignatura"></nav>
+      <nav id="arbol-cursos" class="arbol" aria-label="Índice por curso" hidden></nav>
+    </aside>
+
+    <!-- Contenido: portada, resultados de búsqueda o currículo de un curso -->
+    <main id="vista" class="vista">
+      <noscript>Esta página necesita JavaScript activado.</noscript>
+    </main>
+  </div>
+
+  <!-- Barra inferior con lo seleccionado con las casillas -->
+  <div id="barra-seleccion" class="barra-seleccion" hidden>
+    <span id="sel-cuenta"></span>
+    <button id="sel-copiar" type="button" class="boton primario">⧉ Copiar selección</button>
+    <button id="sel-quitar" type="button" class="boton">Quitar selección</button>
+  </div>
+
+  <div id="aviso" class="aviso" role="status" hidden></div>
+
+  <!-- Primero los datos (window.CURRICULO) y después la aplicación -->
+  <script src="datos.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

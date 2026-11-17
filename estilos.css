@@ -1,0 +1,244 @@
+/* Explorador del currículo: estilos. Claro y oscuro según el sistema. */
+
+/* Paleta y medidas comunes */
+:root {
+  --fondo: #f7f7f5;
+  --panel: #ffffff;
+  --texto: #1f2328;
+  --suave: #5c636b;
+  --borde: #dfe1e4;
+  --acento: #1d5fa8;
+  --acento-fondo: #e7f0fb;
+  --marca: #fff0a8;
+  --comp: #7b3fa0;
+  --crit: #1d7a4a;
+  --cont: #a8561d;
+  --alto-cabecera: 3.5rem;
+  --ancho-indice: 21rem;
+  color-scheme: light;
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #16181b;
+    --panel: #1e2125;
+    --texto: #e6e8ea;
+    --suave: #a0a7ae;
+    --borde: #33383e;
+    --acento: #7fb2ee;
+    --acento-fondo: #22324a;
+    --marca: #6b5a00;
+    --comp: #c99be6;
+    --crit: #77d3a1;
+    --cont: #f0a874;
+    color-scheme: dark;
+  }
+}
+
+/* Base */
+* { box-sizing: border-box; }
+/* «hidden» tiene que ganar a cualquier display (p. ej., la barra de selección con display:flex) */
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+}
+a { color: var(--acento); }
+button, input, select { font: inherit; color: inherit; }
+mark { background: var(--marca); color: inherit; border-radius: 2px; padding: 0 1px; }
+
+/* Cabecera fija con el buscador */
+.cabecera {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 0.75rem;
+  height: var(--alto-cabecera); padding: 0 1rem;
+  background: var(--panel); border-bottom: 1px solid var(--borde);
+}
+.cabecera h1 { margin: 0; font-size: 1.1rem; white-space: nowrap; }
+.cabecera h1 a { color: inherit; text-decoration: none; }
+.cabecera h1 .sub { color: var(--suave); font-weight: 400; }
+.boton-indice { display: none; background: none; border: 1px solid var(--borde); border-radius: 6px; padding: 0.2rem 0.6rem; cursor: pointer; }
+.buscador { position: relative; flex: 1; max-width: 46rem; margin-left: auto; }
+.buscador input {
+  width: 100%; padding: 0.45rem 2.2rem 0.45rem 0.8rem;
+  border: 1px solid var(--borde); border-radius: 8px; background: var(--fondo);
+}
+.buscador input:focus { outline: 2px solid var(--acento); outline-offset: -1px; }
+.atajo {
+  position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%);
+  font-size: 0.75rem; color: var(--suave); border: 1px solid var(--borde); border-radius: 4px; padding: 0 0.35rem;
+}
+
+/* Barra de filtros */
+.filtros {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.2rem;
+  padding: 0.4rem 1rem; font-size: 0.88rem; color: var(--suave);
+  background: var(--panel); border-bottom: 1px solid var(--borde);
+}
+.filtros select { margin-left: 0.3rem; padding: 0.15rem 0.3rem; border: 1px solid var(--borde); border-radius: 6px; background: var(--fondo); }
+.filtros .tipos { display: flex; flex-wrap: wrap; gap: 0.2rem 0.9rem; }
+
+/* Disposición: índice a la izquierda y contenido a la derecha */
+.cuerpo { display: grid; grid-template-columns: var(--ancho-indice) minmax(0, 1fr); }
+.indice {
+  position: sticky; top: var(--alto-cabecera);
+  height: calc(100vh - var(--alto-cabecera)); overflow: auto;
+  background: var(--panel); border-right: 1px solid var(--borde);
+}
+.vista { padding: 1.5rem clamp(1rem, 3vw, 2.5rem) 4rem; max-width: 62rem; min-width: 0; }
+
+/* Pestañas de los árboles */
+.pestanas { position: sticky; top: 0; z-index: 1; display: flex; background: var(--panel); border-bottom: 1px solid var(--borde); }
+.pestanas button { flex: 1; padding: 0.6rem; border: 0; background: none; cursor: pointer; color: var(--suave); border-bottom: 2px solid transparent; }
+.pestanas button.activa { color: var(--acento); border-bottom-color: var(--acento); font-weight: 600; }
+
+/* Árboles (details/summary) */
+.arbol { padding: 0.4rem 0 2rem; font-size: 0.93rem; }
+.arbol details > summary { cursor: pointer; padding: 0.25rem 0.8rem; list-style: none; border-radius: 4px; }
+.arbol details > summary::-webkit-details-marker { display: none; }
+.arbol details > summary::before { content: "▸"; display: inline-block; width: 1rem; color: var(--suave); transition: transform 0.12s; }
+.arbol details[open] > summary::before { transform: rotate(90deg); }
+.arbol summary:hover, .arbol a:hover { background: var(--acento-fondo); }
+.arbol .etapa > summary { font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; font-size: 0.8rem; color: var(--suave); padding-top: 0.6rem; }
+.arbol details details { margin-left: 0.9rem; }
+.arbol a { display: block; padding: 0.2rem 0.8rem 0.2rem 2rem; text-decoration: none; color: inherit; border-radius: 4px; margin-left: 0.9rem; }
+.arbol a.activo { background: var(--acento-fondo); color: var(--acento); font-weight: 600; }
+.arbol .nota { color: var(--suave); font-size: 0.82em; }
+
+/* Portada */
+.portada h2 { margin-top: 0; }
+.cifras { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0.8rem; margin: 1.2rem 0; }
+.cifra { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 0.8rem 1rem; }
+.cifra strong { display: block; font-size: 1.6rem; }
+.cifra span { color: var(--suave); font-size: 0.88rem; }
+.normas li { margin: 0.2rem 0; }
+
+/* Vista de un curso */
+.migas { color: var(--suave); font-size: 0.88rem; margin-bottom: 0.3rem; }
+.titulo-nivel { margin: 0 0 0.2rem; font-size: 1.6rem; line-height: 1.25; }
+.subtitulo { color: var(--suave); margin: 0 0 0.8rem; }
+.acciones { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.6rem 0 1.2rem; }
+.chip, .boton {
+  display: inline-block; padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.85rem;
+  border: 1px solid var(--borde); background: var(--panel); color: inherit; text-decoration: none; cursor: pointer;
+}
+.chip.activo { background: var(--acento-fondo); color: var(--acento); border-color: var(--acento); }
+.boton:hover, .chip:hover { border-color: var(--acento); }
+.seccion { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; margin: 1rem 0; }
+.seccion > summary { cursor: pointer; padding: 0.7rem 1rem; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem; }
+.seccion > summary .cuenta { color: var(--suave); font-weight: 400; font-size: 0.85rem; }
+.seccion > summary .boton { margin-left: auto; font-weight: 400; }
+.seccion .dentro { padding: 0 1rem 1rem; }
+.seccion h4 { margin: 1rem 0 0.3rem; font-size: 0.98rem; }
+.seccion.comp > summary { color: var(--comp); }
+.seccion.crit > summary { color: var(--crit); }
+.seccion.cont > summary { color: var(--cont); }
+.lista { list-style: none; margin: 0; padding: 0; }
+.lista li { position: relative; display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.3rem 2rem 0.3rem 0; border-radius: 4px; }
+.lista li .texto { flex: 1; min-width: 0; }
+.lista li:has(.tick:checked) { background: var(--acento-fondo); }
+.lista li .cod { font-weight: 700; margin-right: 0.35rem; }
+.lista li.enc { font-weight: 600; }
+.lista li .copiar {
+  position: absolute; right: 0; top: 0.25rem; opacity: 0; border: 0; background: none; cursor: pointer; color: var(--suave);
+}
+.lista li:hover .copiar, .lista li .copiar:focus { opacity: 1; }
+.destello { animation: destello 2.4s ease-out; }
+@keyframes destello { 0%, 30% { background: var(--marca); } 100% { background: transparent; } }
+
+/* Casillas de selección */
+.tick, .tick-grupo { width: 1.05rem; height: 1.05rem; margin: 0.22rem 0 0; flex: none; cursor: pointer; accent-color: var(--acento); }
+.tick-hueco { width: 1.05rem; flex: none; }
+
+/* Pestañas para saltar a cada sección (se quedan fijas bajo la cabecera) */
+.saltos {
+  position: sticky; top: var(--alto-cabecera); z-index: 10;
+  display: flex; gap: 0.3rem; margin: 0 calc(-1 * clamp(1rem, 3vw, 2.5rem)); padding: 0.5rem clamp(1rem, 3vw, 2.5rem);
+  background: var(--fondo); border-bottom: 1px solid var(--borde);
+}
+.saltos a {
+  padding: 0.35rem 0.9rem; border-radius: 8px; text-decoration: none; color: var(--suave); font-weight: 600;
+  border: 1px solid transparent;
+}
+.saltos a .cuenta { font-weight: 400; font-size: 0.8rem; margin-left: 0.3rem; }
+.saltos a:hover { background: var(--panel); border-color: var(--borde); }
+.saltos a.activa { background: var(--panel); border-color: var(--borde); color: var(--acento); }
+.saltos a[data-destino="sec-comp"].activa { color: var(--comp); }
+.saltos a[data-destino="sec-crit"].activa { color: var(--crit); }
+.saltos a[data-destino="sec-cont"].activa { color: var(--cont); }
+.seccion, .lista li, .seccion h4 { scroll-margin-top: calc(var(--alto-cabecera) + 3.6rem); }
+
+/* Cabeceras de grupo (criterio, bloque): casilla, título y botón de copiar */
+.seccion h4 { display: flex; align-items: flex-start; gap: 0.5rem; }
+.seccion h4 > span { flex: 1; }
+.seccion h4 .boton { font-weight: 400; font-size: 0.78rem; padding: 0.1rem 0.6rem; white-space: nowrap; }
+.seccion h4 .nota { color: var(--suave); font-weight: 400; font-size: 0.85em; }
+.grupo-criterio + .grupo-criterio, .grupo-bloque + .grupo-bloque { border-top: 1px dashed var(--borde); margin-top: 0.8rem; }
+
+/* Barra inferior con la selección */
+.barra-seleccion {
+  position: fixed; left: 50%; bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 40;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.6rem;
+  max-width: calc(100vw - 2rem); padding: 0.55rem 0.8rem 0.55rem 1.1rem;
+  background: var(--panel); border: 1px solid var(--borde); border-radius: 12px; box-shadow: 0 6px 24px rgb(0 0 0 / 0.18);
+}
+.barra-seleccion #sel-cuenta { font-weight: 600; }
+.boton.primario { background: var(--acento); border-color: var(--acento); color: var(--panel); }
+body.con-seleccion .vista { padding-bottom: 7rem; }
+body.con-seleccion .aviso { bottom: 5.5rem; }
+
+/* Resultados de búsqueda */
+.resumen { color: var(--suave); margin: 0 0 1rem; }
+.coinciden { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+.grupo { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; margin: 0 0 1rem; overflow: hidden; }
+.grupo h3 { margin: 0; padding: 0.55rem 1rem; font-size: 0.98rem; border-bottom: 1px solid var(--borde); }
+.grupo h3 a { text-decoration: none; }
+.grupo h3 .sub { color: var(--suave); font-weight: 400; }
+.resultado { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.5rem 1rem; border-top: 1px solid var(--borde); }
+.resultado > a { flex: 1; min-width: 0; text-decoration: none; color: inherit; }
+.resultado:has(.tick:checked) { background: var(--acento-fondo); }
+.grupo h3 { display: flex; align-items: center; gap: 0.5rem; }
+.grupo h3 + .resultado { border-top: 0; }
+.resultado:hover { background: var(--acento-fondo); }
+.tipo { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-right: 0.4rem; }
+.tipo.comp { color: var(--comp); }
+.tipo.crit { color: var(--crit); }
+.tipo.cont, .tipo.bloque { color: var(--cont); }
+.mas { display: block; margin: 1rem auto; padding: 0.5rem 1.2rem; }
+.vacio { color: var(--suave); padding: 2rem 0; }
+
+/* Aviso flotante («Copiado») */
+.aviso {
+  position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 50;
+  background: var(--texto); color: var(--fondo); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem;
+}
+
+/* Móvil y tabletas: el índice se convierte en un panel que se abre con ☰ */
+@media (max-width: 820px) {
+  .boton-indice { display: inline-block; }
+  .cabecera h1 .sub, .atajo { display: none; }
+  .cuerpo { grid-template-columns: minmax(0, 1fr); }
+  .indice {
+    position: fixed; top: var(--alto-cabecera); left: 0; z-index: 30;
+    width: min(88vw, var(--ancho-indice)); transform: translateX(-100%); transition: transform 0.2s;
+    box-shadow: 0 0 24px rgb(0 0 0 / 0.25);
+  }
+  body.indice-abierto .indice { transform: none; }
+  .lista li .copiar { opacity: 0.5; }
+  .saltos { overflow-x: auto; }
+  .saltos a { white-space: nowrap; }
+  .seccion h4 { flex-wrap: wrap; }
+}
+
+/* Impresión: solo el contenido */
+@media print {
+  .cabecera, .filtros, .indice, .acciones, .copiar, .seccion > summary .boton, .seccion h4 .boton,
+  .saltos, .tick, .tick-grupo, .barra-seleccion, .aviso { display: none !important; }
+  .cuerpo { display: block; }
+  .vista { max-width: none; padding: 0; }
+  .seccion { border: 0; }
+  body { background: #fff; color: #000; }
+}
