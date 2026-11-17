@@ -116,6 +116,16 @@ mark { background: var(--marca); color: inherit; border-radius: 2px; padding: 0 
 .cifra span { color: var(--suave); font-size: 0.88rem; }
 .normas li { margin: 0.2rem 0; }
 
+/* Listado de asignaturas de una etapa o un curso */
+.tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0.7rem; }
+.tarjeta {
+  display: flex; flex-direction: column; gap: 0.2rem; padding: 0.8rem 1rem;
+  background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; color: inherit; text-decoration: none;
+}
+a.tarjeta:hover { border-color: var(--acento); }
+.tarjeta span { color: var(--suave); font-size: 0.85rem; }
+.tarjeta .acciones { margin: 0.4rem 0 0; }
+
 /* Vista de un curso */
 .migas { color: var(--suave); font-size: 0.88rem; margin-bottom: 0.3rem; }
 .titulo-nivel { margin: 0 0 0.2rem; font-size: 1.6rem; line-height: 1.25; }
